@@ -9,14 +9,14 @@ extern "C" {
         double mass_flow,        // kg/s
         bool* valve_states,      // массив состояний кранов
         int valve_count,         // количество кранов
-        int* diam_piplane = new int[3](),         // диаметры труб 
+                // диаметры труб 
         double* results          // массив для результатов [output_pressure, velocity, pressure_drop, reynolds]
     ) {
         // Физические константы
         const double R = 8.314;       // Универсальная газовая постоянная [Дж/(моль·K)]
         const double M = 0.029;       // Молярная масса метана [кг/моль]
         const double R_specific = R / M;  // Удельная газовая постоянная
-        
+        int* diam_piplane = new int[3](); 
         // Параметры трубы
         const double D = 0.5;         // Диаметр трубы [м]
         const double A = M_PI * D * D / 4.0;  // Площадь сечения [м²]

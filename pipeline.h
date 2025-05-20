@@ -15,11 +15,11 @@ extern double x_y;
 class PipLineSection{
 private:
 std::string name;
-double press_start;
-double volume;
-int length;
+double press_start;//в МПа
+double volume;// млн. м3 в сутки
+int length;// в метрах
 double diam_1, diam_2, diam_3;
-double eque_diametr;
+double eque_diametr;//в милиметрах
 // Переменные, которые зависят от других переменных
 double density_relative;
 double z;
