@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include "pipeline.h"
 
 extern "C" {
     void calculate_gas_params(
@@ -8,6 +9,7 @@ extern "C" {
         double mass_flow,        // kg/s
         bool* valve_states,      // массив состояний кранов
         int valve_count,         // количество кранов
+        int* diam_piplane = new int[3](),         // диаметры труб 
         double* results          // массив для результатов [output_pressure, velocity, pressure_drop, reynolds]
     ) {
         // Физические константы
@@ -30,7 +32,9 @@ extern "C" {
                 open_valves++;
             }
         }
-        
+        if (valve_states[0]){diam_piplane[0] = 512;}
+        if (valve_states[1]){diam_piplane[1] = 515;}
+        if (valve_states[2]){diam_piplane[2] = 703;}
         if (open_valves == 0) {
             std::cerr << "Все краны закрыты!" << std::endl;
             results[0] = 0.0;  // output_pressure
@@ -39,6 +43,9 @@ extern "C" {
             results[3] = 0.0;  // reynolds
             return;
         }
+        
+        PipLineSection first_section("0-28", initial_pressure, 8000, 28000, diam_piplane[0], diam_piplane[1], diam_piplane[2]); 
+        
         
         // Плотность газа (уравнение состояния идеального газа)
         double rho = initial_pressure / (R_specific * temperature);
@@ -50,7 +57,7 @@ extern "C" {
         double velocity = mass_flow / (rho * A_eff);
         
         // Число Рейнольдса
-        double Re = rho * velocity * D / mu;
+        double Re = first_section.get_re();
         
         // Коэффициент трения
         double f = (Re > 4000) ? 0.316 / pow(Re, 0.25) : 64.0 / Re;
@@ -59,7 +66,7 @@ extern "C" {
         double delta_P = f * (L / D) * (rho * velocity * velocity) / 2.0;
         
         // Давление на выходе
-        double output_pressure = initial_pressure - delta_P;
+        double output_pressure = first_section.calc_press();
         
         // Записываем результаты
         results[0] = output_pressure;
@@ -75,5 +82,6 @@ extern "C" {
         std::cout << "  Скорость газа: " << velocity << " м/с" << std::endl;
         std::cout << "  Перепад давления: " << delta_P << " Pa" << std::endl;
         std::cout << "  Число Рейнольдса: " << Re << std::endl;
+        delete[] diam_piplane;
     }
 }
